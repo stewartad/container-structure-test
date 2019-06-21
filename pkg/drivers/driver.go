@@ -22,10 +22,12 @@ import (
 	"github.com/GoogleContainerTools/container-structure-test/pkg/types/unversioned"
 )
 
+// TODO: add singularity driver here
 const (
 	Docker = "docker"
 	Tar    = "tar"
 	Host   = "host"
+	Singularity = "singularity"
 )
 
 type DriverConfig struct {
@@ -69,6 +71,8 @@ func InitDriverImpl(driver string) func(DriverConfig) (Driver, error) {
 		return NewTarDriver
 	case Host:
 		return NewHostDriver
+	case Singularity:
+		return NewSingularityDriver
 	default:
 		return nil
 	}
