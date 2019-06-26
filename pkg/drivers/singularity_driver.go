@@ -74,7 +74,7 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 	}
 	defer d.cli.StopInstance(instanceName)
 
-	stdout, stderr, code, err := d.cli.Execute(instanceName, command)
+	stdout, stderr, code, err := d.cli.Execute(instanceName, command, true)
 	return stdout, stderr, code, err
 }
 
