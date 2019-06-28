@@ -3,6 +3,10 @@ package drivers
 import (
 	"os"
 	"fmt"
+	"path/filepath"
+	"archive/tar"
+	"io"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/GoogleContainerTools/container-structure-test/pkg/types/unversioned"
@@ -74,11 +78,49 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 	}
 	defer d.cli.StopInstance(instanceName)
 
-	stdout, stderr, code, err := d.cli.Execute(instanceName, command, true)
+	stdout, stderr, code, err := d.cli.Execute(instanceName, command, singularity.DefaultExecOptions())
 	return stdout, stderr, code, err
 }
 
 func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
+	instanceName := "testing"
+	err := d.cli.NewInstance(d.currentImage, instanceName)
+	if err != nil {
+		return nil, err
+	}
+	defer d.cli.StopInstance(instanceName)
+
+	t, read, err := d.cli.CopyTarball(instanceName, path)
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(filepath.Dir(t))
+
+	for {
+		head, err := read.Next()
+		if err == io.EOF {
+			break
+		}
+
+		/*
+		* BEGIN FILE LOGIC HERE
+		* EVERYTHING ELSE IS BOILER PLATE
+		*/
+		switch head.Typeflag {
+		case tar.TypeDir, tar.TypeReg, tar.TypeLink, tar.TypeSymlink:
+			
+			if filepath.Clean(head.Name) == filepath.Base(path) {
+				return head.FileInfo(), nil
+			}
+		default:
+			continue
+		}
+		/*
+		 * END FILE LOGIC
+		 */
+		 return nil, fmt.Errorf("File %s not found in image", path)
+	}
+
 	return nil, nil
 }
 
