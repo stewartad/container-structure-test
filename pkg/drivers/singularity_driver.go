@@ -109,7 +109,7 @@ func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
 		switch head.Typeflag {
 		case tar.TypeDir, tar.TypeReg, tar.TypeLink, tar.TypeSymlink:
 			
-			if filepath.Clean(head.Name) == filepath.Base(path) {
+			if filepath.Base(head.Name) == filepath.Base(path) {
 				return head.FileInfo(), nil
 			}
 		default:
