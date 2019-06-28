@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"archive/tar"
 	"io"
+	"bytes"
+	"bufio"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -82,19 +85,31 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 	return stdout, stderr, code, err
 }
 
-func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
+func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func()) {
 	instanceName := "testing"
 	err := d.cli.NewInstance(d.currentImage, instanceName)
 	if err != nil {
-		return nil, err
+		return nil, err, func() {}
 	}
 	defer d.cli.StopInstance(instanceName)
+	t, read, err := d.cli.CopyTarball(instanceName, target)
+	if err != nil {
+		return nil, err, func() {}
+	}
+	// defer os.RemoveAll(filepath.Dir(t))
 
-	t, read, err := d.cli.CopyTarball(instanceName, path)
+	return read, nil, func() {
+		os.RemoveAll(filepath.Dir(t))
+	}
+}
+
+func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
+	
+	read, err, cleanup := d.retrieveTar(path)
 	if err != nil {
 		return nil, err
 	}
-	defer os.RemoveAll(filepath.Dir(t))
+	defer cleanup()
 
 	for {
 		head, err := read.Next()
@@ -109,7 +124,7 @@ func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
 		switch head.Typeflag {
 		case tar.TypeDir, tar.TypeReg, tar.TypeLink, tar.TypeSymlink:
 			
-			if filepath.Base(head.Name) == filepath.Base(path) {
+			if filepath.Clean(head.Name) == filepath.Base(path) {
 				return head.FileInfo(), nil
 			}
 		default:
@@ -118,18 +133,77 @@ func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
 		/*
 		 * END FILE LOGIC
 		 */
-		 return nil, fmt.Errorf("File %s not found in image", path)
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("File %s not found in image", path)
 }
 
 func (d *SingularityDriver) ReadFile(path string) ([]byte, error) {
-	return nil, nil
+
+	read, err, cleanup := d.retrieveTar(path)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup()
+
+	for {
+		head, err := read.Next()
+		if err == io.EOF {
+			break
+		}
+
+		/*
+		* BEGIN FILE LOGIC HERE
+		* EVERYTHING ELSE IS BOILER PLATE
+		*/
+		switch head.Typeflag {
+		case tar.TypeDir:
+			if filepath.Clean(head.Name) == filepath.Base(path) {
+				return nil, fmt.Errorf("Cannot read specified path: %s is a directory, not a file", path)
+			}
+		case tar.TypeSymlink:
+			return d.ReadFile(head.Linkname)
+		case tar.TypeReg, tar.TypeLink:
+			if filepath.Clean(head.Name) == filepath.Base(path) {
+				var b bytes.Buffer
+				stream := bufio.NewWriter(&b)
+				io.Copy(stream, read)
+				return b.Bytes(), nil
+			}
+		default:
+			continue
+		}
+		/*
+		 * END FILE LOGIC
+		 */
+	}
+
+	return nil, fmt.Errorf("File %s not found in image", path)
 }
 
 func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
-	return nil, nil
+	read, err, cleanup := d.retrieveTar(path)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup()
+	var infos []os.FileInfo
+	for {
+		header, err := read.Next()
+		if err == io.EOF {
+			break
+		}
+		if header.Typeflag == tar.TypeDir {
+			// we only want top level dirs here, no recursion. to get these, remove
+			// trailing separator and split on separator. there should only be two parts.
+			parts := strings.Split(strings.TrimSuffix(header.Name, string(os.PathSeparator)), string(os.PathSeparator))
+			if len(parts) == 2 {
+				infos = append(infos, header.FileInfo())
+			}
+		}
+	}
+
+	return infos, nil
 }
 
 func (d *SingularityDriver) GetConfig() (unversioned.Config, error) {
