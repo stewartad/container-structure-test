@@ -211,6 +211,13 @@ func (d *DockerDriver) retrieveTar(path string) (*tar.Reader, error) {
 	if err = stream.Flush(); err != nil {
 		return nil, err
 	}
+
+	f, err := os.Create("/tmp/dockertestdata")
+	if err != nil {
+		panic(err)
+	}
+	w := bufio.NewWriter(f)
+	io.Copy(w, bytes.NewReader(b.Bytes()))
 	return tar.NewReader(bytes.NewReader(b.Bytes())), nil
 }
 
