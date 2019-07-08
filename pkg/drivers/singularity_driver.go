@@ -65,15 +65,16 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 	}
 
 	if stdout != "" {
-		logrus.Infof("stdout: %s", stdout)
+		logrus.Infof("stdout:\n %s", stdout)
 	}
 	if stderr != "" {
-		logrus.Infof("stderr: %s", stderr)
+		logrus.Infof("stderr:\n %s", stderr)
 	}
 	return stdout, stderr, exitCode, nil
 }
 
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
+	// TODO: process env variables
 	instanceName := "testing"
 	err := d.cli.NewInstance(d.currentImage, instanceName)
 	if err != nil {
