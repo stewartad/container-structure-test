@@ -65,10 +65,10 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 	}
 
 	if stdout != "" {
-		logrus.Infof("stdout:\n %s", stdout)
+		logrus.Infof("stdout:\n%s", stdout)
 	}
 	if stderr != "" {
-		logrus.Infof("stderr:\n %s", stderr)
+		logrus.Infof("stderr:\n%s", stderr)
 	}
 	return stdout, stderr, exitCode, nil
 }
