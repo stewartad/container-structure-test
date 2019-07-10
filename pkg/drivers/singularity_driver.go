@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/GoogleContainerTools/container-structure-test/pkg/types/unversioned"
-	_ "github.com/GoogleContainerTools/container-structure-test/pkg/utils"
+	_"github.com/GoogleContainerTools/container-structure-test/pkg/utils"
 
 	singularity "github.com/stewartad/singolang/client"
 )
