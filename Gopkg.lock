@@ -240,12 +240,12 @@
   revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
 
 [[projects]]
-  digest = "1:41683803fe21c1593aee676380d6f935b7707ac81b0e06bf8fd34b1ee62be072"
+  digest = "1:fe19df04ab9000ba1af52d83e1ad446385615b742063650ed1513ea74cd6de39"
   name = "github.com/stewartad/singolang"
-  packages = ["client"]
+  packages = ["."]
   pruneopts = "NUT"
-  revision = "8bdc7ca5b0c006ffdc91a5aba35f64cc69734e8a"
-  version = "v0.0.1"
+  revision = "e3cd06c57e73da25e31353d79e6c5dec5cd15112"
+  version = "v0.0.2"
 
 [[projects]]
   branch = "master"
@@ -305,7 +305,7 @@
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
-    "github.com/stewartad/singolang/client",
+    "github.com/stewartad/singolang",
     "golang.org/x/crypto/ssh/terminal",
     "gopkg.in/yaml.v2",
   ]

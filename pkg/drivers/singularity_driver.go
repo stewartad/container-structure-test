@@ -15,7 +15,7 @@ import (
 	"github.com/GoogleContainerTools/container-structure-test/pkg/types/unversioned"
 	_"github.com/GoogleContainerTools/container-structure-test/pkg/utils"
 
-	singularity "github.com/stewartad/singolang/client"
+	singularity "github.com/stewartad/singolang"
 )
 
 type SingularityDriver struct {

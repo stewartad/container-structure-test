@@ -1,4 +1,4 @@
-package client
+package singolang
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 // PullOptions provide a set of options to configure the pull command.
 //
 type PullOptions struct {
-	name       string
-	pullfolder string
-	force      bool
+	Name       string
+	Pullfolder string
+	Force      bool
 }
 
 type pullError struct {
@@ -29,7 +29,7 @@ func (e *pullError) Error() string {
 func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
 	cmd := initCommand("pull")
 
-	if opts.force {
+	if opts.Force {
 		cmd = append(cmd, "-F")
 	}
 
@@ -41,13 +41,13 @@ func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
 		return "", &pullError{msg: "Pull only valid for singularity hub and docker hub"}
 	}
 
-	name := opts.name
+	name := opts.Name
 
-	if opts.name == "" {
+	if opts.Name == "" {
 		name = GetFilename(image, "")
 	}
-	if opts.pullfolder != "" {
-		name = filepath.Join(opts.pullfolder, name)
+	if opts.Pullfolder != "" {
+		name = filepath.Join(opts.Pullfolder, name)
 	}
 
 	cmd = append(cmd, name)
@@ -57,7 +57,7 @@ func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
 
 	runCommand(cmd, defaultRunCommandOptions())
 
-	finalImage := filepath.Join(opts.pullfolder, filepath.Base(name))
+	finalImage := filepath.Join(opts.Pullfolder, filepath.Base(name))
 
 	_, err = os.Stat(finalImage)
 	if err != nil {
