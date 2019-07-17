@@ -28,8 +28,8 @@ type runCommandOptions struct {
 func defaultRunCommandOptions() *runCommandOptions {
 	return &runCommandOptions{
 		sudo:     false,
-		quietout: false,
-		quieterr: false,
+		quietout: true,
+		quieterr: true,
 	}
 }
 
@@ -101,10 +101,9 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			// log.Printf("Command failed with %s\n", err)
+			log.Printf("Command failed with %s\n", err)
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		}
-		// log.Printf("Unknown Error, Exit Status: %s", err)
 	}
 
 	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)

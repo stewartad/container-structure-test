@@ -240,12 +240,12 @@
   revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
 
 [[projects]]
-  digest = "1:fe19df04ab9000ba1af52d83e1ad446385615b742063650ed1513ea74cd6de39"
+  digest = "1:7332a907ce35299e0048f7fb6b18de51569495c415a5865c3f254b52b635a293"
   name = "github.com/stewartad/singolang"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "e3cd06c57e73da25e31353d79e6c5dec5cd15112"
-  version = "v0.0.2"
+  revision = "ed82cc3c211cb0464b83b9b1b7e2bc3d4bc1f526"
+  version = "v0.0.3"
 
 [[projects]]
   branch = "master"

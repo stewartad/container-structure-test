@@ -18,7 +18,7 @@ func (e *instanceError) Error() string {
 // Client is a struct to hold information about the current client
 type Client struct {
 	simage    string // this will be assigned by the load() function
-	instances map[string]*instance
+	instances map[string]*Instance
 	Sudo      bool // either everything or nothing you do is sudo
 	Cleanenv  bool
 }
@@ -28,7 +28,7 @@ type Client struct {
 func NewClient() (*Client, func(c *Client)) {
 	return &Client{
 			simage:    "",
-			instances: make(map[string]*instance),
+			instances: make(map[string]*Instance),
 			Sudo:      false,
 			Cleanenv:  true,
 		},
@@ -48,20 +48,35 @@ func (c *Client) String() string {
 	return baseClient
 }
 
+// Execute wraps the internal execute function
+func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
+	_, exists := c.instances[instance]
+	if !exists {
+		return "", "", -1, &existError{instance}
+	}
+
+	return c.instances[instance].execute(command, opts, c.Sudo) 
+}
+
 // NewInstance creates a new instance and adds it to the client, if it is able to be started
-func (c *Client) NewInstance(image string, name string) error {
+func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Instance, error) {
 	i := getInstance(image, name)
+	i.EnvOpts = env
 	err := i.start(c.Sudo)
+	i.RetrieveEnv()
+	i.RetrieveLabels()
+	i.EnvOpts.ProcessEnvVars()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	c.instances[name] = i
-	return nil
+	return i, nil
 }
 
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
+	c.instances[name].EnvOpts.unsetAll()
 	err := c.instances[name].stop(c.Sudo)
 	return err
 }

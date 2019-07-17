@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-func load() {
-
-}
-
 func setenv() {
 
 }

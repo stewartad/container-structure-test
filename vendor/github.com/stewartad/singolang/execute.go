@@ -7,15 +7,21 @@ import (
 
 // ExecOptions provide flags simulating options int he singularity command line
 type ExecOptions struct {
-	pwd   string
-	quiet bool
+	Pwd   	string
+	Quiet	bool
+	Cleanenv bool
+	Env		*EnvOptions
 }
+
+
 
 // DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
 	return &ExecOptions{
-		pwd:   "",
-		quiet: true,
+		Pwd:   "",
+		Quiet: true,
+		Cleanenv: true,
+		Env: DefaultEnvOptions(),
 	}
 }
 
@@ -28,20 +34,19 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
+func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := initCommand("exec")
-
-	_, exists := c.instances[instance]
-	if !exists {
-		return "", "", -1, &existError{instance}
-	}
+	instance := i.name
 
 	// TODO: bind paths
 
-	if opts.pwd != "" {
-		cmd = append(cmd, "--pwd", opts.pwd)
+	if opts.Cleanenv {
+		cmd = append(cmd, "--cleanenv")
+	}
+	if opts.Pwd != "" {
+		cmd = append(cmd, "--pwd", opts.Pwd)
 	}
 
 	var image string
@@ -51,13 +56,28 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 		image = instance
 	}
 
+	err := opts.Env.ProcessEnvVars()
+	if err != nil {
+		return "", "", -1, err
+	}
+	err = opts.Env.processPathMod()
+	if err != nil {
+		return "", "", -1, err
+	}
+
+	// deferred functions execute LIFO
+	defer i.EnvOpts.ProcessEnvVars()
+	defer opts.Env.unsetAll()
+	
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
+	fmt.Println(cmd)
+
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
-		sudo:     c.Sudo,
-		quieterr: opts.quiet,
-		quietout: opts.quiet,
+		sudo:     sudo,
+		quieterr: opts.Quiet,
+		quietout: opts.Quiet,
 	})
 	// TODO: use status
 	_ = status

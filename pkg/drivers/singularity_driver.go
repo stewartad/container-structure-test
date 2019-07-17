@@ -76,7 +76,7 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
 	// TODO: process env variables
 	instanceName := "testing"
-	err := d.cli.NewInstance(d.currentImage, instanceName)
+	_, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
 	if err != nil {
 		return "", "", -1, err
 	}
@@ -88,7 +88,7 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 
 func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func()) {
 	instanceName := "testing"
-	err := d.cli.NewInstance(d.currentImage, instanceName)
+	_, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
 	if err != nil {
 		return nil, err, func() {}
 	}
