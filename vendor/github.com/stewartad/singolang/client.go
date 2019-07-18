@@ -58,6 +58,13 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 	return c.instances[instance].execute(command, opts, c.Sudo) 
 }
 
+func (c *Client) GetInstance(instance string) *Instance {
+	if _, exists := c.instances[instance]; !exists {
+		return nil
+	}
+	return c.instances[instance]
+}
+
 // NewInstance creates a new instance and adds it to the client, if it is able to be started
 func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Instance, error) {
 	i := getInstance(image, name)

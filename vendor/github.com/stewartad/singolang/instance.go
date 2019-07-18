@@ -139,6 +139,13 @@ func (i *Instance) GetInfo() map[string]string {
 	return m
 }
 
+func (i *Instance) SetEnv(opts *EnvOptions) {
+	i.EnvOpts = opts
+	i.RetrieveEnv()
+	i.RetrieveLabels()
+	i.EnvOpts.ProcessEnvVars()
+}
+
 // GetEnv gets the instance environment
 func (i *Instance) GetEnv() *EnvOptions {
 	return i.EnvOpts

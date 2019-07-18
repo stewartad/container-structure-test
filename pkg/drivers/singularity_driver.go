@@ -21,6 +21,7 @@ import (
 type SingularityDriver struct {
 	originalImage 	string
 	currentImage 	string
+	currentInstance	*singularity.Instance
 	cli 			singularity.Client
 	env				map[string]string
 	save			bool
@@ -30,10 +31,15 @@ type SingularityDriver struct {
 func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	newCli, teardown := singularity.NewClient()
 	_ = teardown
+	instance, err := newCli.NewInstance(args.Image, "testing", singularity.DefaultEnvOptions())
+	if err != nil {
+		return &SingularityDriver{}, nil
+	}
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
 		currentImage:	args.Image,
+		currentInstance: instance,
 		cli:			*newCli,
 		env:			nil,
 		save:			args.Save,
@@ -50,20 +56,11 @@ func (d *SingularityDriver) Teardown(fullCommands [][]string) error {
 }
 
 func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
+	env := d.processEnvVars(envVars)
+	d.currentInstance.SetEnv(&singularity.EnvOptions{
+		EnvVars: convertSliceToMap(env),
+	})
 	return nil
-}
-
-func (d *SingularityDriver) processEnvVars(vars []unversioned.EnvVar) []string {
-	if len(vars) == 0 {
-		return nil
-	}
-
-	env := []string{}
-
-	for _, envVar := range vars {
-		env = append(env, fmt.Sprintf("%s=%s", envVar.Key, envVar.Value))
-	}
-	return env
 }
 
 func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCommand []string) (string, string, int, error) {
@@ -231,4 +228,40 @@ func (d *SingularityDriver) GetConfig() (unversioned.Config, error) {
 
 func (d *SingularityDriver) Destroy() {
 
+}
+
+// returns a func that consumes a string, and returns the value associated with
+// that string when treated as a key in the image's environment.
+func retrieveSingularityEnv(d *SingularityDriver) func(string) string {
+	return func(envVar string) string {
+		var env map[string]string
+		if env == nil {
+			image := d.currentInstance
+			// convert env to map for processing
+			env = image.EnvOpts.EnvVars
+		}
+		return env[envVar]
+	}
+}
+
+// returns the value associated with the provided key in the image's environment
+func (d *SingularityDriver) retrieveEnvVar(envVar string) string {
+	// since we're only retrieving these during processing, we can use a closure to cache this
+	return retrieveSingularityEnv(d)(envVar)
+}
+
+// given a list of env vars, return a new list with each var's value appended to it
+// in the form 'key==val'. we do this because docker expects them to be passed this way.
+func (d *SingularityDriver) processEnvVars(vars []unversioned.EnvVar) []string {
+	if len(vars) == 0 {
+		return nil
+	}
+
+	env := []string{}
+
+	for _, envVar := range vars {
+		expandedVal := os.Expand(envVar.Value, d.retrieveEnvVar)
+		env = append(env, fmt.Sprintf("%s=%s", envVar.Key, expandedVal))
+	}
+	return env
 }
