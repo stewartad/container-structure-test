@@ -59,6 +59,9 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	env := d.processEnvVars(envVars)
 	d.currentInstance.SetEnv(&singularity.EnvOptions{
 		EnvVars: convertSliceToMap(env),
+		AppendPath: []string{},
+		PrependPath: []string{},
+		ReplacePath: "",
 	})
 	return nil
 }
