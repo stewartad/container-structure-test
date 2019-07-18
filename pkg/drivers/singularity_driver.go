@@ -53,6 +53,19 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	return nil
 }
 
+func (d *SingularityDriver) processEnvVars(vars []unversioned.EnvVar) []string {
+	if len(vars) == 0 {
+		return nil
+	}
+
+	env := []string{}
+
+	for _, envVar := range vars {
+		env = append(env, fmt.Sprintf("%s=%s", envVar.Key, envVar.Value))
+	}
+	return env
+}
+
 func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCommand []string) (string, string, int, error) {
 	var env []string
 	for _, envVar := range envVars {
@@ -76,15 +89,18 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
 	// TODO: process env variables
 	instanceName := "testing"
-	_, err := d.cli.NewInstance(d.currentImage, instanceName, &singularity.EnvOptions{
-		EnvVars: convertSliceToMap(env),
-	})
+	_, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
 	if err != nil {
 		return "", "", -1, err
 	}
 	defer d.cli.StopInstance(instanceName)
 
-	stdout, stderr, code, err := d.cli.Execute(instanceName, command, singularity.DefaultExecOptions())
+	opts := singularity.DefaultExecOptions()
+	opts.Env = &singularity.EnvOptions{
+		EnvVars: convertSliceToMap(env),
+	}
+
+	stdout, stderr, code, err := d.cli.Execute(instanceName, command, opts)
 	return stdout, stderr, code, err
 }
 
