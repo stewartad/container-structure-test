@@ -76,7 +76,9 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
 	// TODO: process env variables
 	instanceName := "testing"
-	_, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
+	_, err := d.cli.NewInstance(d.currentImage, instanceName, &singularity.EnvOptions{
+		EnvVars: convertSliceToMap(env),
+	})
 	if err != nil {
 		return "", "", -1, err
 	}
