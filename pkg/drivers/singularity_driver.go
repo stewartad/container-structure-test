@@ -76,10 +76,6 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 	for _, envVar := range envVars {
 		env = append(env, fmt.Sprintf("%s=%s", envVar.Key, envVar.Value))
 	}
-
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
 	
 	stdout, stderr, exitCode, err := d.exec(env, fullCommand)
 	if err != nil {
@@ -103,6 +99,10 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 	// 	return "", "", -1, err
 	// }
 	// defer d.cli.StopInstance(instanceName)
+
+	sudo := d.cli.Sudo
+	d.currentInstance.Start(sudo)
+	defer d.currentInstance.Stop(sudo)
 
 	opts := singularity.DefaultExecOptions()
 	opts.Env = &singularity.EnvOptions{
