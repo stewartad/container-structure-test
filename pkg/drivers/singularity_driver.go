@@ -36,6 +36,7 @@ func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	if err != nil {
 		return &SingularityDriver{}, nil
 	}
+	instance.Start(newCli.Sudo)
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
@@ -67,6 +68,7 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	if err != nil {
 		return errors.Wrap(err, "Error creating container")
 	}
+	d.currentInstance.Stop(d.cli.Sudo)
 	d.currentInstance = container
 	return nil
 }
@@ -113,6 +115,10 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 	// 	return nil, err, func() {}
 	// }
 	// defer d.cli.StopInstance(instanceName)
+	sudo := d.cli.Sudo
+	d.currentInstance.Start(sudo)
+	defer d.currentInstance.Stop(sudo)
+
 	t, read, err := d.cli.CopyTarball(d.currentInstance.GetInfo()["name"], target)
 	if err != nil {
 		return nil, err, func() {}
@@ -125,10 +131,6 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 }
 
 func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
-
 	read, err, cleanup := d.retrieveTar(path)
 	if err != nil {
 		return nil, err
@@ -163,10 +165,6 @@ func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
 }
 
 func (d *SingularityDriver) ReadFile(path string) ([]byte, error) {
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
-
 	read, err, cleanup := d.retrieveTar(path)
 	if err != nil {
 		return nil, err
@@ -209,10 +207,6 @@ func (d *SingularityDriver) ReadFile(path string) ([]byte, error) {
 }
 
 func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
-
 	read, err, cleanup := d.retrieveTar(path)
 	if err != nil {
 		return nil, err
