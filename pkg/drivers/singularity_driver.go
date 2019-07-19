@@ -110,13 +110,13 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 }
 
 func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func()) {
-	instanceName := "testing"
+	// instanceName := "testing"
 	// _, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
 	// if err != nil {
 	// 	return nil, err, func() {}
 	// }
 	// defer d.cli.StopInstance(instanceName)
-	t, read, err := d.cli.CopyTarball(instanceName, target)
+	t, read, err := d.cli.CopyTarball(d.currentInstance, target)
 	if err != nil {
 		return nil, err, func() {}
 	}
