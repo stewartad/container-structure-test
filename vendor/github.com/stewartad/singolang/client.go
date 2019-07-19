@@ -69,13 +69,13 @@ func (c *Client) GetInstance(instance string) *Instance {
 func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Instance, error) {
 	i := getInstance(image, name)
 	i.EnvOpts = env
-	err := i.start(c.Sudo)
+	// err := i.Start(c.Sudo)
 	i.RetrieveEnv()
 	i.RetrieveLabels()
 	i.EnvOpts.ProcessEnvVars()
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 	c.instances[name] = i
 	return i, nil
 }
@@ -84,7 +84,7 @@ func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Insta
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
 	c.instances[name].EnvOpts.unsetAll()
-	err := c.instances[name].stop(c.Sudo)
+	err := c.instances[name].Stop(c.Sudo)
 	return err
 }
 

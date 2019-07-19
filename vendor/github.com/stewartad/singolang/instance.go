@@ -63,7 +63,7 @@ func (i *Instance) updateEnv() {
 
 // Start starts an instance
 // Does not support startscript args
-func (i *Instance) start(sudo bool) error {
+func (i *Instance) Start(sudo bool) error {
 	cmd := initCommand("instance", "start")
 
 	cmd = append(cmd, i.imageURI, i.name)
@@ -80,7 +80,7 @@ func (i *Instance) start(sudo bool) error {
 }
 
 // Stop stops an instance.
-func (i *Instance) stop(sudo bool) error {
+func (i *Instance) Stop(sudo bool) error {
 	cmd := initCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
