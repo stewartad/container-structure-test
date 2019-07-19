@@ -116,7 +116,7 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 	// 	return nil, err, func() {}
 	// }
 	// defer d.cli.StopInstance(instanceName)
-	t, read, err := d.cli.CopyTarball(d.currentInstance, target)
+	t, read, err := d.cli.CopyTarball(d.currentInstance.GetInfo()["name"], target)
 	if err != nil {
 		return nil, err, func() {}
 	}
