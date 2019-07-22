@@ -101,7 +101,7 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 		EnvVars: convertSliceToMap(env),
 	}
 
-	stdout, stderr, code, err := d.currentInstance.Execute(command, opts, sudo)
+	stdout, stderr, code, err := d.currentInstance.Execute(command, opts, d.cli.Sudo)
 	return stdout, stderr, code, err
 }
 
