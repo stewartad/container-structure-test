@@ -32,7 +32,7 @@ type SingularityDriver struct {
 func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	newCli, teardown := singularity.NewClient()
 	_ = teardown
-	instance, err := newCli.NewInstance(args.Image, "testing-base", singularity.DefaultEnvOptions())
+	instance, err := newCli.NewInstance(args.Image, "testing-current", singularity.DefaultEnvOptions())
 	if err != nil {
 		return &SingularityDriver{}, nil
 	}
@@ -59,7 +59,7 @@ func (d *SingularityDriver) Teardown(fullCommands [][]string) error {
 
 func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	env := d.processEnvVars(envVars)
-	container, err := d.cli.NewInstance(d.currentImage, "test-case-maybe", &singularity.EnvOptions{
+	container, err := d.cli.NewInstance(d.currentImage, "testing-current", &singularity.EnvOptions{
 		EnvVars: convertSliceToMap(env),
 		AppendPath: []string{},
 		PrependPath: []string{},
