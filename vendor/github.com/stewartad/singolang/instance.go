@@ -3,18 +3,20 @@ package singolang
 import (
 	"fmt"
 	"strings"
+	"log"
 )
 
 // Instance holds information about a currently running image instance
 type Instance struct {
-	name     string
-	imageURI string
-	protocol string
-	image    string
+	Name     string
+	ImageURI string
+	Protocol string
+	Image    string
 	Cleanenv bool
 	ImgLabels	 map[string]string
 	ImgEnvVars	 map[string]string
 	EnvOpts	 *EnvOptions
+	Sudo	 bool
 	cmd      []string
 	Options  []string
 	Metadata []string // might go unused
@@ -27,10 +29,10 @@ var instanceOpts = runCommandOptions{
 }
 
 func (i *Instance) String() string {
-	if i.protocol != "" {
-		return fmt.Sprintf("%s:\\%s", i.protocol, i.image)
+	if i.Protocol != "" {
+		return fmt.Sprintf("%s:\\%s", i.Protocol, i.Image)
 	}
-	return i.image
+	return i.Image
 }
 
 // GetInstance returns a new Instance with image information
@@ -39,12 +41,13 @@ func getInstance(image string, name string, options ...string) *Instance {
 	i.parseImageName(image)
 
 	if name != "" {
-		i.name = name
+		i.Name = name
 	}
 	i.Cleanenv = true
 	i.ImgEnvVars = make(map[string]string)
 	i.ImgLabels = make(map[string]string)
 	i.EnvOpts = DefaultEnvOptions()
+	i.Sudo = false
 
 	i.Options = options
 	return i
@@ -52,8 +55,8 @@ func getInstance(image string, name string, options ...string) *Instance {
 
 // parseImageName processes the image name and protocol
 func (i *Instance) parseImageName(image string) {
-	i.imageURI = image
-	i.protocol, i.image = SplitURI(image)
+	i.ImageURI = image
+	i.Protocol, i.Image = SplitURI(image)
 }
 
 
@@ -66,7 +69,7 @@ func (i *Instance) updateEnv() {
 func (i *Instance) Start(sudo bool) error {
 	cmd := initCommand("instance", "start")
 
-	cmd = append(cmd, i.imageURI, i.name)
+	cmd = append(cmd, i.ImageURI, i.Name)
 
 	if i.Cleanenv {
 		cmd = append(cmd, "--cleanenv")
@@ -82,17 +85,19 @@ func (i *Instance) Start(sudo bool) error {
 // Stop stops an instance.
 func (i *Instance) Stop(sudo bool) error {
 	cmd := initCommand("instance", "stop")
-	cmd = append(cmd, i.name)
+	cmd = append(cmd, i.Name)
 
 	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
 	// TODO: use these
+	log.Println(stdout)
+	log.Println(stderr)
 	_, _, _ = stdout, stderr, status
 	return err
 }
 
 func (i *Instance) RetrieveLabels() error {
 	i.ImgLabels = make(map[string]string)
-	cmd := []string{"singularity", "inspect", "--labels", i.image}
+	cmd := []string{"singularity", "inspect", "--labels", i.Image}
 	stdout, _, _, err := runCommand(cmd, defaultRunCommandOptions())
 
 	for _, label := range strings.Split(string(stdout.Bytes()), "\n") {
@@ -108,7 +113,7 @@ func (i *Instance) RetrieveLabels() error {
 func (i *Instance) RetrieveEnv() error {
 	i.ImgEnvVars = make(map[string]string)
 	cmd := []string{"env"}
-	stdout, _, _, err := i.execute(cmd, DefaultExecOptions(), false)
+	stdout, _, _, err := i.Execute(cmd, DefaultExecOptions(), false)
 	
 	if err != nil {
 		return err
@@ -131,10 +136,10 @@ func (i *Instance) RetrieveEnv() error {
 // GetInfo returns the information about an Instance
 func (i *Instance) GetInfo() map[string]string {
 	m := make(map[string]string)
-	m["name"] = i.name
-	m["imageURI"] = i.imageURI
-	m["protocol"] = i.protocol
-	m["image"] = i.image
+	m["name"] = i.Name
+	m["imageURI"] = i.ImageURI
+	m["protocol"] = i.Protocol
+	m["image"] = i.Image
 	m["cmd"] = strings.Join(i.cmd, " ")
 	return m
 }

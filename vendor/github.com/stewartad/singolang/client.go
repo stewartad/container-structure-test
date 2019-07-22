@@ -48,15 +48,15 @@ func (c *Client) String() string {
 	return baseClient
 }
 
-// Execute wraps the internal execute function
-func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
-	_, exists := c.instances[instance]
-	if !exists {
-		return "", "", -1, &existError{instance}
-	}
+// // Execute wraps the internal execute function
+// func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
+// 	_, exists := c.instances[instance]
+// 	if !exists {
+// 		return "", "", -1, &existError{instance}
+// 	}
 
-	return c.instances[instance].execute(command, opts, c.Sudo) 
-}
+// 	return c.instances[instance].execute(command, opts, c.Sudo) 
+// }
 
 func (c *Client) GetInstance(instance string) *Instance {
 	if _, exists := c.instances[instance]; !exists {

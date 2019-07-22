@@ -104,7 +104,7 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 		EnvVars: convertSliceToMap(env),
 	}
 
-	stdout, stderr, code, err := d.cli.Execute(d.currentInstance.GetInfo()["name"], command, opts)
+	stdout, stderr, code, err := d.currentInstance.Execute(command, opts, sudo)
 	return stdout, stderr, code, err
 }
 
@@ -119,7 +119,7 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 	d.currentInstance.Start(sudo)
 	defer d.currentInstance.Stop(sudo)
 
-	t, read, err := d.cli.CopyTarball(d.currentInstance.GetInfo()["name"], target)
+	t, read, err := d.currentInstance.CopyTarball(target)
 	if err != nil {
 		return nil, err, func() {}
 	}

@@ -3,6 +3,7 @@ package singolang
 import (
 	"fmt"
 	"strings"
+	"log"
 )
 
 // ExecOptions provide flags simulating options int he singularity command line
@@ -34,11 +35,11 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (string, string, int, error) {
+func (i *Instance) Execute(command []string, opts *ExecOptions, sudo bool) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := initCommand("exec")
-	instance := i.name
+	instance := i.Name
 
 	// TODO: bind paths
 
@@ -72,7 +73,7 @@ func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (stri
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	fmt.Println(cmd)
+	log.Println(cmd)
 
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
 		sudo:     sudo,
