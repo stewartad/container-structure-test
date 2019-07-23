@@ -103,8 +103,12 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			log.Printf("cmd: %s\n", cmd)
-			log.Printf("Command failed with %s\n", err)
+			if !opts.quieterr {	
+				log.Printf("cmd: %s\n", cmd)
+				log.Printf("stdout: %s", string(stdoutBuf.Bytes()))
+				log.Printf("stderr: %s", string(stderrBuf.Bytes()))
+				log.Printf("Command failed with %s\n", err)
+			}
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		}
 	}

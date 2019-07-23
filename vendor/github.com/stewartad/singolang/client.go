@@ -26,7 +26,6 @@ type Client struct {
 // NewClient creates and returns a new client as well as a teardown function.
 // Assign this teardown function and defer it to exit cleanly
 func NewClient() (*Client, func(c *Client)) {
-	log.Println("Creating Client 2 Electric Boogaloo")
 	return &Client{
 			simage:    "",
 			instances: make(map[string]*Instance),
@@ -73,6 +72,7 @@ func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Insta
 	// err := i.Start(c.Sudo)
 	i.RetrieveEnv()
 	i.RetrieveLabels()
+
 	i.EnvOpts.ProcessEnvVars()
 	// if err != nil {
 	// 	return nil, err

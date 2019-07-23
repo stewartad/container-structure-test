@@ -19,7 +19,9 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	// fmt.Printf("%s\t%s\t%s\n", path, file, parentDir)
 	dir := fmt.Sprintf("/tmp/%s", i.Name)
 	Mkdirp(dir)
-	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
+	
+	archivePath := filepath.Join(dir, fmt.Sprintf("%s-archive.tar.gz", filepath.Base(parentDir)))
+	// archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
 
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
