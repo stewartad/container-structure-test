@@ -32,11 +32,11 @@ type SingularityDriver struct {
 func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	newCli, teardown := singularity.NewClient()
 	_ = teardown
-	instance, err := newCli.NewInstance(args.Image, "testing-current", singularity.DefaultEnvOptions())
+	instance, err := newCli.NewInstance(args.Image, "testing-base", singularity.DefaultEnvOptions())
 	if err != nil {
 		return &SingularityDriver{}, nil
 	}
-	instance.Start(newCli.Sudo)
+	// instance.Start(newCli.Sudo)
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
