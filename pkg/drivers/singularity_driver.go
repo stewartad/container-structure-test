@@ -36,8 +36,6 @@ func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	if err != nil {
 		return &SingularityDriver{}, nil
 	}
-	// instance.Start(newCli.Sudo)
-	fmt.Println(args.Metadata)
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
@@ -111,12 +109,6 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 }
 
 func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func()) {
-	// instanceName := "testing"
-	// _, err := d.cli.NewInstance(d.currentImage, instanceName, singularity.DefaultEnvOptions())
-	// if err != nil {
-	// 	return nil, err, func() {}
-	// }
-	// defer d.cli.StopInstance(instanceName)
 	sudo := d.cli.Sudo
 	d.currentInstance.Start(sudo)
 	defer d.currentInstance.Stop(sudo)
