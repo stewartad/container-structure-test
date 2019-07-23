@@ -37,6 +37,7 @@ func NewSingularityDriver(args DriverConfig) (Driver, error) {
 		return &SingularityDriver{}, nil
 	}
 	// instance.Start(newCli.Sudo)
+	fmt.Println(args.Metadata)
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
