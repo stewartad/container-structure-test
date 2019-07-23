@@ -67,7 +67,7 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	if err != nil {
 		return errors.Wrap(err, "Error creating container")
 	}
-	// container.Start(d.cli.Sudo)
+	
 	d.currentInstance.Stop(d.cli.Sudo)
 	d.currentInstance = container
 	return nil
@@ -228,9 +228,6 @@ func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
 func (d *SingularityDriver) GetConfig() (unversioned.Config, error) {
 	env := d.currentInstance.ImgEnvVars
 	labels := d.currentInstance.ImgLabels
-
-	fmt.Println(env)
-	fmt.Println(labels)
 
 	return unversioned.Config{
 		Env: env,
