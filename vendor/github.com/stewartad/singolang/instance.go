@@ -53,6 +53,22 @@ func getInstance(image string, name string, options ...string) *Instance {
 	return i
 }
 
+func (i *Instance) IsRunning() bool {
+	cmd := []string{"singularity", "instance", "list"}
+	opts := runCommandOptions{
+		sudo: i.Sudo,
+		quietout: true,
+		quieterr: true,
+	}
+	stdout, _, _, err := runCommand(cmd, &opts) 
+	if err != nil {
+		return false
+	}
+	name := fmt.Sprintf("%s", i.Name)
+	output := string(stdout.Bytes())
+	return strings.Contains(output, name)
+}
+
 // parseImageName processes the image name and protocol
 func (i *Instance) parseImageName(image string) {
 	i.ImageURI = image
@@ -89,8 +105,8 @@ func (i *Instance) Stop(sudo bool) error {
 
 	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
 	// TODO: use these
-	log.Println(stdout)
-	log.Println(stderr)
+	log.Printf("instance stdout: %s\n", stdout)
+	log.Printf("instance stderr: %s\n", stderr)
 	_, _, _ = stdout, stderr, status
 	return err
 }
@@ -112,14 +128,14 @@ func (i *Instance) RetrieveLabels() error {
 // RetrieveEnv retrieves all env variables in the instance and stores them in a map
 func (i *Instance) RetrieveEnv() error {
 	i.ImgEnvVars = make(map[string]string)
-	cmd := []string{"env"}
-	stdout, _, _, err := i.Execute(cmd, DefaultExecOptions(), false)
-	
+	cmd := []string{"singularity", "exec", i.Image, "env"}
+	stdout, _, _, err := runCommand(cmd, defaultRunCommandOptions())
+	output := string(stdout.Bytes())
 	if err != nil {
 		return err
 	}
 
-	for _, env := range strings.Split(stdout, "\n") {
+	for _, env := range strings.Split(output, "\n") {
 		v := strings.Split(env, "=")
 		if len(v) > 1 {
 			i.ImgEnvVars[v[0]] = v[1]

@@ -73,7 +73,7 @@ func (i *Instance) Execute(command []string, opts *ExecOptions, sudo bool) (stri
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	log.Println(cmd)
+	log.Printf("cmd: %s\n", cmd)
 
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
 		sudo:     sudo,
