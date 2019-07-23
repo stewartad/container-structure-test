@@ -69,7 +69,9 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 		return errors.Wrap(err, "Error creating container")
 	}
 	// container.Start(d.cli.Sudo)
-	d.currentInstance.Stop(d.cli.Sudo)
+	if d.currentInstance.IsRunning() {
+		d.currentInstance.Stop(d.cli.Sudo)
+	}
 	d.currentInstance = container
 	return nil
 }
