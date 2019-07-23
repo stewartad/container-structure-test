@@ -233,7 +233,10 @@ func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
 }
 
 func (d *SingularityDriver) GetConfig() (unversioned.Config, error) {
-	return unversioned.Config{}, nil
+	return unversioned.Config{
+		Env: d.currentInstance.GetEnv().EnvVars,
+		Labels: d.currentInstance.ImgLabels,
+	}, nil
 }
 
 func (d *SingularityDriver) Destroy() {
