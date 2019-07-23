@@ -226,14 +226,20 @@ func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
 }
 
 func (d *SingularityDriver) GetConfig() (unversioned.Config, error) {
+	env := d.currentInstance.ImgEnvVars
+	labels := d.currentInstance.ImgLabels
+
+	fmt.Println(env)
+	fmt.Println(labels)
+
 	return unversioned.Config{
-		Env: d.currentInstance.ImgEnvVars,
+		Env: env,
 		Entrypoint: []string{},
 		Cmd: []string{},
 		Volumes: []string{},
 		Workdir: "",
 		ExposedPorts: []string{},
-		Labels: d.currentInstance.ImgLabels,
+		Labels: labels,
 	}, nil
 }
 
