@@ -36,7 +36,7 @@ func NewSingularityDriver(args DriverConfig) (Driver, error) {
 	if err != nil {
 		return &SingularityDriver{}, nil
 	}
-	instance.Start(newCli.Sudo)
+	// instance.Start(newCli.Sudo)
 
 	return &SingularityDriver{
 		originalImage:	args.Image,
@@ -68,7 +68,7 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	if err != nil {
 		return errors.Wrap(err, "Error creating container")
 	}
-	container.Start(d.cli.Sudo)
+	// container.Start(d.cli.Sudo)
 	d.currentInstance.Stop(d.cli.Sudo)
 	d.currentInstance = container
 	return nil
@@ -97,8 +97,8 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
 
 	sudo := d.cli.Sudo
-	// d.currentInstance.Start(sudo)
-	// defer d.currentInstance.Stop(sudo)
+	d.currentInstance.Start(sudo)
+	defer d.currentInstance.Stop(sudo)
 
 	opts := singularity.DefaultExecOptions()
 	opts.Env = &singularity.EnvOptions{
@@ -116,9 +116,9 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 	// 	return nil, err, func() {}
 	// }
 	// defer d.cli.StopInstance(instanceName)
-	// sudo := d.cli.Sudo
-	// d.currentInstance.Start(sudo)
-	// defer d.currentInstance.Stop(sudo)
+	sudo := d.cli.Sudo
+	d.currentInstance.Start(sudo)
+	defer d.currentInstance.Stop(sudo)
 
 	t, read, err := d.currentInstance.CopyTarball(target)
 	if err != nil {
