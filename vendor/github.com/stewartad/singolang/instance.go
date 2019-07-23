@@ -3,7 +3,7 @@ package singolang
 import (
 	"fmt"
 	"strings"
-	"log"
+	_"log"
 )
 
 // Instance holds information about a currently running image instance
@@ -91,11 +91,13 @@ func (i *Instance) Start(sudo bool) error {
 		cmd = append(cmd, "--cleanenv")
 	}
 
-	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
-	// TODO: use these
-	_, _, _ = stdout, stderr, status
-
-	return err
+	if !i.IsRunning() {
+		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+		// TODO: use these
+		_, _, _ = stdout, stderr, status
+		return err
+	}
+	return nil
 }
 
 // Stop stops an instance.
@@ -103,11 +105,18 @@ func (i *Instance) Stop(sudo bool) error {
 	cmd := initCommand("instance", "stop")
 	cmd = append(cmd, i.Name)
 
-	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+	var err error
+
+	if i.IsRunning() {
+		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+		_, _, _ = stdout, stderr, status
+		return err
+	}
+	
 	// TODO: use these
-	log.Printf("instance stdout: %s\n", stdout)
-	log.Printf("instance stderr: %s\n", stderr)
-	_, _, _ = stdout, stderr, status
+	// log.Printf("instance stdout: %s\n", stdout)
+	// log.Printf("instance stderr: %s\n", stderr)
+	
 	return err
 }
 

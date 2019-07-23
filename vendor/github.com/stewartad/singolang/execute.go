@@ -3,7 +3,7 @@ package singolang
 import (
 	"fmt"
 	"strings"
-	"log"
+	_"log"
 )
 
 // ExecOptions provide flags simulating options int he singularity command line
@@ -73,7 +73,7 @@ func (i *Instance) Execute(command []string, opts *ExecOptions, sudo bool) (stri
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	log.Printf("cmd: %s\n", cmd)
+	// log.Printf("cmd: %s\n", cmd)
 
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
 		sudo:     sudo,

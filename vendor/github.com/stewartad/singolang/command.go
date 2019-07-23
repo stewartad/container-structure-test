@@ -45,6 +45,8 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	}
 	name := cmd[0]
 
+	
+
 	// create command instance
 	process := exec.Command(name, cmd[1:]...)
 
@@ -101,14 +103,12 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
+			log.Printf("cmd: %s\n", cmd)
 			log.Printf("Command failed with %s\n", err)
-			log.Printf("command.go stderr: %s", string(stderrBuf.Bytes()))
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		}
 	}
-
-	log.Printf("stdout: %s", string(stdoutBuf.Bytes()))
-
+	
 	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")
