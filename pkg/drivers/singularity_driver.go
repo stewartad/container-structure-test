@@ -68,7 +68,7 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 		return errors.Wrap(err, "Error creating container")
 	}
 	
-	d.currentInstance.Stop(d.cli.Sudo)
+	d.currentInstance.Stop()
 	d.currentInstance = container
 	return nil
 }
@@ -95,23 +95,22 @@ func (d *SingularityDriver) ProcessCommand(envVars []unversioned.EnvVar, fullCom
 
 func (d *SingularityDriver) exec(env []string, command []string) (string, string, int, error) {
 
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
+	d.currentInstance.Start()
+	defer d.currentInstance.Stop()
 
 	opts := singularity.DefaultExecOptions()
 	opts.Env = &singularity.EnvOptions{
 		EnvVars: convertSliceToMap(env),
 	}
 
-	stdout, stderr, code, err := d.currentInstance.Execute(command, opts, sudo)
+	stdout, stderr, code, err := d.currentInstance.Execute(command, opts)
 	return stdout, stderr, code, err
 }
 
 func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, func(), error) {
-	sudo := d.cli.Sudo
-	d.currentInstance.Start(sudo)
-	defer d.currentInstance.Stop(sudo)
+
+	d.currentInstance.Start()
+	defer d.currentInstance.Stop()
 
 	t, read, err := d.currentInstance.CopyTarball(target)
 	cleanup := func(){

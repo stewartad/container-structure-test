@@ -25,7 +25,7 @@ func DefaultEnvOptions() *EnvOptions {
 	}
 }
 
-// UpdateEnv clears all 
+// UpdateEnv unsets all stored variables and processes them again
 func (opts *EnvOptions) UpdateEnv() error {
 	opts.unsetAll()
 	err := opts.ProcessEnvVars()
@@ -45,6 +45,7 @@ func ClearEnv() error {
 	return err
 }
 
+// ProcessEnvVars sets all variables in the EnvVars map on the host system with the prefix SINGULARITYENV_
 func (opts *EnvOptions) ProcessEnvVars() error {
 	var err error
 	for k, v := range opts.EnvVars {

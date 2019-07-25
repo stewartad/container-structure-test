@@ -14,7 +14,6 @@ import (
 func initCommand(args ...string) []string {
 	cmd := []string{"singularity"}
 	cmd = append(cmd, args...)
-	// append quiet or debug if flags are set in client
 	return cmd
 }
 
@@ -24,7 +23,6 @@ type runCommandOptions struct {
 	quieterr bool
 }
 
-//
 func defaultRunCommandOptions() *runCommandOptions {
 	return &runCommandOptions{
 		sudo:     false,
@@ -33,19 +31,12 @@ func defaultRunCommandOptions() *runCommandOptions {
 	}
 }
 
-/*RunCommand runs a terminal command
-cmd - a slice of strings, of which the first element must be the command name
-	all subsequent elements are the arguments
-opts - runCommandOptions struct defining options to be used
-*/
 func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buffer, int, error) {
 	// add sudo to front of command if requested
 	if opts.sudo {
 		cmd = append([]string{"sudo"}, cmd...)
 	}
 	name := cmd[0]
-
-	
 
 	// create command instance
 	process := exec.Command(name, cmd[1:]...)

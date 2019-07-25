@@ -3,7 +3,7 @@ package singolang
 import (
 	"fmt"
 	"strings"
-	_"log"
+	"log"
 )
 
 // ExecOptions provide flags simulating options int he singularity command line
@@ -13,8 +13,6 @@ type ExecOptions struct {
 	Cleanenv bool
 	Env		*EnvOptions
 }
-
-
 
 // DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
@@ -34,8 +32,8 @@ func (e *existError) Error() string {
 	return fmt.Sprintf("%s is not a loaded instance", e.instance)
 }
 
-// Execute runs a command inside a container
-func (i *Instance) Execute(command []string, opts *ExecOptions, sudo bool) (string, string, int, error) {
+// Execute runs a command inside the instance. Returns stdout, stderr, return code, and an error, if any
+func (i *Instance) Execute(command []string, opts *ExecOptions) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := initCommand("exec")
@@ -73,19 +71,20 @@ func (i *Instance) Execute(command []string, opts *ExecOptions, sudo bool) (stri
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	// log.Printf("cmd: %s\n", cmd)
+	if !opts.Quiet {
+		log.Printf("cmd: %s\n", cmd)
+	} 
 
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
-		sudo:     sudo,
+		sudo:     i.Sudo,
 		quieterr: opts.Quiet,
 		quietout: opts.Quiet,
 	})
-	// TODO: use status
-	_ = status
+
 	if err != nil {
-		return string(stdout.Bytes()), string(stderr.Bytes()), -1, err
+		return string(stdout.Bytes()), string(stderr.Bytes()), status, err
 	}
 
-	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
+	return string(stdout.Bytes()), string(stderr.Bytes()), status, nil
 
 }

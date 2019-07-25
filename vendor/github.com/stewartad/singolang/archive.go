@@ -11,15 +11,16 @@ import (
 	"log"
 )
 
-// CopyTarball creates a Tar archive of a directory or file and places it in /tmp.
-// It returns the path to the archive, and a reader for the archive
+// CopyTarball creates a Tar archive of a directory or file and places inside the container and places it in /tmp.
+// It returns the path to the output file, and a reader for the archive
 func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
-	// Make directory for archive and set up filepath
+	// Set up filepaths
 	path = filepath.Clean(path)
 	file := filepath.Base(path)
 	parentDir := filepath.Dir(path)
 	dir := filepath.Join(os.TempDir(), i.Name)
 
+	// Make temp directory
 	Mkdirp(dir)
 	
 	archivePrefix := filepath.Base(parentDir)
@@ -44,8 +45,9 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czf", archivePath, file}
-	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
-	if err != nil || code != 0 {
+	_, _, _, err := i.Execute(cmd, &opts)
+	if err != nil {
+		// Always return archivePath so the archive can still be deleted in the case of an error
 		return archivePath, nil, err
 	}
 
