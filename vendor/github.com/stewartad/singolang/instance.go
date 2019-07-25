@@ -133,7 +133,12 @@ func (i *Instance) RetrieveLabels() error {
 // RetrieveEnv retrieves all env variables in the instance and stores them in a map
 func (i *Instance) RetrieveEnv() error {
 	i.ImgEnvVars = make(map[string]string)
-	cmd := []string{"singularity", "exec", "--cleanenv", i.Image, "env"}
+	cmd := initCommand("exec")
+	if i.Cleanenv {
+		cmd = append(cmd, "--cleanenv")
+	}
+	cmd = append(cmd, i.Image, "env")
+	
 	stdout, _, _, err := runCommand(cmd, defaultRunCommandOptions())
 	output := string(stdout.Bytes())
 	if err != nil {
