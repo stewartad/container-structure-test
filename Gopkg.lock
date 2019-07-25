@@ -241,11 +241,11 @@
 
 [[projects]]
   branch = "dev"
-  digest = "1:323705f2f828fbe7b3c7fcb976221d9919d446d23e094a8069eeb7ee9dd6faa4"
+  digest = "1:1b8c94a498e878daad6c80019e4fa0b302d3d0f21e798e9c4a14c4dc7717f05d"
   name = "github.com/stewartad/singolang"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "15df3d2f0394bae388bce673dac6ca2a6dffd6fd"
+  revision = "c134e832ccb884fd523fdc5de3a03cf9dafc2d21"
 
 [[projects]]
   branch = "master"

@@ -108,30 +108,29 @@ func (d *SingularityDriver) exec(env []string, command []string) (string, string
 	return stdout, stderr, code, err
 }
 
-func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func()) {
+func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, func(), error) {
 	sudo := d.cli.Sudo
 	d.currentInstance.Start(sudo)
 	defer d.currentInstance.Stop(sudo)
 
 	t, read, err := d.currentInstance.CopyTarball(target)
-	if err != nil {
-		return nil, err, func() {}
-	}
-
-	_ = t
-
-	return read, nil, func() {
+	cleanup := func(){
 		os.RemoveAll(filepath.Dir(t))
 	}
+	if err != nil {
+		return nil, cleanup, err
+	}
+
+	return read, cleanup, err
 }
 
 func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
-	read, err, cleanup := d.retrieveTar(path)
+	read, cleanup, err := d.retrieveTar(path)
+	defer cleanup()
 	if err != nil {
 		return nil, err
 	}
-	defer cleanup()
-
+	
 	for {
 		head, err := read.Next()
 		if err == io.EOF {
@@ -160,11 +159,11 @@ func (d *SingularityDriver) StatFile(path string) (os.FileInfo, error) {
 }
 
 func (d *SingularityDriver) ReadFile(path string) ([]byte, error) {
-	read, err, cleanup := d.retrieveTar(path)
+	read, cleanup, err := d.retrieveTar(path)
+	defer cleanup()
 	if err != nil {
 		return nil, err
 	}
-	defer cleanup()
 
 	for {
 		head, err := read.Next()
@@ -202,11 +201,12 @@ func (d *SingularityDriver) ReadFile(path string) ([]byte, error) {
 }
 
 func (d *SingularityDriver) ReadDir(path string) ([]os.FileInfo, error) {
-	read, err, cleanup := d.retrieveTar(path)
+	read, cleanup, err := d.retrieveTar(path)
+	defer cleanup()
 	if err != nil {
 		return nil, err
 	}
-	defer cleanup()
+	
 	var infos []os.FileInfo
 	for {
 		header, err := read.Next()

@@ -46,7 +46,7 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	cmd := []string{"tar", "-C", parentDir, "-czf", archivePath, file}
 	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
 	if err != nil || code != 0 {
-		return "", nil, err
+		return archivePath, nil, err
 	}
 
 	// Create reader for archive
@@ -54,12 +54,12 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	if err != nil {
 		log.Printf("Could not read file %s", err)
-		return "", nil, err
+		return archivePath, nil, err
 	}
 	gzr, err := gzip.NewReader(bytes.NewReader(b))
 	if err != nil {
 		log.Println("READ ERROR")
-		return "", nil, err
+		return archivePath, nil, err
 	}
 
 	
