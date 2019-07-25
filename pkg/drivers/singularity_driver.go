@@ -119,6 +119,8 @@ func (d *SingularityDriver) retrieveTar(target string) (*tar.Reader, error, func
 	}
 	// defer os.RemoveAll(filepath.Dir(t))
 
+	_ = t
+
 	return read, nil, func() {
 		os.RemoveAll(filepath.Dir(t))
 	}
