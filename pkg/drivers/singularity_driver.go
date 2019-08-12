@@ -14,7 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/GoogleContainerTools/container-structure-test/pkg/types/unversioned"
-	_"github.com/GoogleContainerTools/container-structure-test/pkg/utils"
 
 	singularity "github.com/stewartad/singolang"
 )
@@ -49,15 +48,18 @@ func NewSingularityDriver(args DriverConfig) (Driver, error) {
 }
 
 func (d *SingularityDriver) Setup(envVars []unversioned.EnvVar, fullCommands[][]string) error {
+	logrus.Debug("Singularity driver does not support setup commands, since containers are read-only. Skipping commands.")
 	return nil
 }
 
 func (d *SingularityDriver) Teardown(fullCommands [][]string) error {
+	logrus.Debug("Singularity driver does not support teardown commands, since each test gets a new driver. Skipping commands.")
 	return nil
 }
 
 func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	env := d.processEnvVars(envVars)
+	// create a new instance with the passed environment variables
 	container, err := d.cli.NewInstance(d.currentImage, "testing-current", &singularity.EnvOptions{
 		EnvVars: convertSliceToMap(env),
 		AppendPath: []string{},
@@ -67,8 +69,9 @@ func (d *SingularityDriver) SetEnv(envVars []unversioned.EnvVar) error {
 	if err != nil {
 		return errors.Wrap(err, "Error creating container")
 	}
-	
+	// stop current container
 	d.currentInstance.Stop()
+	// set current container to new env
 	d.currentInstance = container
 	return nil
 }
